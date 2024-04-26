@@ -23,6 +23,7 @@ bool LLPluginTest::enable() {
     logger.info("Enabling...");
     // Code for enabling the plugin goes here.
     command::regCmd(logger);
+    perm_test::permTest();
     return true;
 }
 
