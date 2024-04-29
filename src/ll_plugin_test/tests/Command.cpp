@@ -19,36 +19,40 @@
 #include "mc/server/commands/CommandMessage.h"
 // #include "mc/server/commands/CommandOperator.h"
 // #include "mc/server/commands/CommandPosition.h"
+#include "mc/_HeaderOutputPredefine.h"
+#include "mc/deps/core/common/bedrock/typeid_t.h"
+#include "mc/deps/json/Value.h"
+#include "mc/server/commands/CommandBlockName.h"
+#include "mc/server/commands/CommandItem.h"
 #include "mc/server/commands/CommandPositionFloat.h"
 #include "mc/server/commands/CommandRawText.h"
-#include "mc/deps/core/common/bedrock/typeid_t.h"
 #include "mc/server/commands/CommandSelector.h"
 #include "mc/server/commands/CommandWildcardInt.h"
-#include "mc/deps/json/Value.h"
 #include "mc/server/commands/RelativeFloat.h"
-#include "mc/server/commands/CommandItem.h"
-#include "mc/server/commands/CommandBlockName.h"
 #include "mc/world/actor/ActorDefinitionIdentifier.h"
 #include "mc/world/effect/MobEffect.h"
-#include "mc/_HeaderOutputPredefine.h"
 
-#include <vector>
-#include <string>
+
 #include <memory>
+#include <string>
+#include <vector>
+
 
 namespace ll_plugin_test::command {
 
 void regCmd(ll::Logger& logger) {
     // 注册命令A
-    auto& cmd = ll::command::CommandRegistrar::getInstance().getOrCreateCommand("testcommand", "test command", CommandPermissionLevel::Any);
+    auto& cmd = ll::command::CommandRegistrar::getInstance()
+                    .getOrCreateCommand("testcommand", "test command", CommandPermissionLevel::Any);
     // 设置别名
     ll::service::getCommandRegistry()->registerAlias("testcommand", "testcmd");
     cmd.alias("tcmd");
     // 获取别名列表
     const auto aliasList = cmd.alias();
-    for (unsigned long long i = 0; i < aliasList.size(); i++) logger.info("Test command alias list [{}]: {}", i, aliasList[i]);
+    for (unsigned long long i = 0; i < aliasList.size(); i++)
+        logger.info("Test command alias list [{}]: {}", i, aliasList[i]);
     // 无参数指令重载
-    cmd.overload().text("o").execute<[](CommandOrigin const& origin, CommandOutput& output){
+    cmd.overload().text("o").execute<[](CommandOrigin const& origin, CommandOutput& output) {
         auto* entity = origin.getEntity();
         if (entity == nullptr || !entity->isType(ActorType::Player)) {
             output.error("Only players can run this command");
@@ -62,9 +66,9 @@ void regCmd(ll::Logger& logger) {
     struct CmdParamA {
         std::vector<BlockStateCommandParam> blockStateArray;
         // CommandCompareOperator compareOperator;
-        CommandFilePath pathCommand;
+        CommandFilePath     pathCommand;
         CommandIntegerRange fullIntegerRange;
-        CommandMessage messageRoot;
+        CommandMessage      messageRoot;
     };
     cmd.overload<CmdParamA>()
         .text("a")
@@ -73,23 +77,34 @@ void regCmd(ll::Logger& logger) {
         .required("pathCommand")
         .required("fullIntegerRange")
         .required("messageRoot")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamA const& param){
+        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamA const& param) {
             (void)origin;
-            for (unsigned long long i = 0; i < param.blockStateArray.size(); i++) 
-                output.success("blockStateArray[{}] = mBlockState: {}, mValue: {}, mType: {}", i, param.blockStateArray[i].mBlockState, param.blockStateArray[i].mValue, param.blockStateArray[i].mValue);
+            for (unsigned long long i = 0; i < param.blockStateArray.size(); i++)
+                output.success(
+                    "blockStateArray[{}] = mBlockState: {}, mValue: {}, mType: {}",
+                    i,
+                    param.blockStateArray[i].mBlockState,
+                    param.blockStateArray[i].mValue,
+                    param.blockStateArray[i].mValue
+                );
             // output.success("compareOperator = {}", param.compareOperator);
             output.success("pathCommand = {}", param.pathCommand.mText);
-            output.success("fullIntegerRange = mMinValue: {}, mMaxValue: {}, mInvert: {}", param.fullIntegerRange.mMinValue, param.fullIntegerRange.mMaxValue, param.fullIntegerRange.mInvert);
+            output.success(
+                "fullIntegerRange = mMinValue: {}, mMaxValue: {}, mInvert: {}",
+                param.fullIntegerRange.mMinValue,
+                param.fullIntegerRange.mMaxValue,
+                param.fullIntegerRange.mInvert
+            );
             for (unsigned long long i = 0; i < param.messageRoot.components.size(); i++)
                 output.success("messageRoot[{}] = {}", i, param.messageRoot.components[i].string);
         }>();
-    
+
     // 设置参数
     struct CmdParamB {
         // CommandOperator commandOperator;
         // CommandPosition position;
         CommandPositionFloat positionFloat;
-        CommandRawText rawtext;
+        CommandRawText       rawtext;
     };
     cmd.overload<CmdParamB>()
         .text("b")
@@ -99,8 +114,15 @@ void regCmd(ll::Logger& logger) {
         .required("rawtext")
         .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamB const& param) {
             // output.success("operator = {}", param.commandOperator);
-            // output.success("position = {}, {}, {}", param.position.getPosition(CommandVersion::CurrentVersion, origin).x, param.position.getPosition(CommandVersion::CurrentVersion, origin).y, param.position.getPosition(CommandVersion::CurrentVersion, origin).z);
-            output.success("positionFloat = {}, {}, {}", origin.getExecutePosition(CommandVersion::CurrentVersion, param.positionFloat).x, origin.getExecutePosition(CommandVersion::CurrentVersion, param.positionFloat).y, origin.getExecutePosition(CommandVersion::CurrentVersion, param.positionFloat).z);
+            // output.success("position = {}, {}, {}", param.position.getPosition(CommandVersion::CurrentVersion,
+            // origin).x, param.position.getPosition(CommandVersion::CurrentVersion, origin).y,
+            // param.position.getPosition(CommandVersion::CurrentVersion, origin).z);
+            output.success(
+                "positionFloat = {}, {}, {}",
+                origin.getExecutePosition(CommandVersion::CurrentVersion, param.positionFloat).x,
+                origin.getExecutePosition(CommandVersion::CurrentVersion, param.positionFloat).y,
+                origin.getExecutePosition(CommandVersion::CurrentVersion, param.positionFloat).z
+            );
             /*
                 pos和posfloat完全没有任何的区别
                 忽悠人的
@@ -115,18 +137,18 @@ void regCmd(ll::Logger& logger) {
             */
             output.success("rawtext = {}", param.rawtext.getText());
         }>();
-    
+
     // 设置参数
     struct CmdParamC {
-        CommandSelector<Player> selectionPlayer;
-        CommandSelector<Actor> selectionActor;
-        CommandWildcardInt wildcardInt;
-        Json::Value jsonObject;
-        RelativeFloat rVal;
-        std::basic_string<char> id;
+        CommandSelector<Player>        selectionPlayer;
+        CommandSelector<Actor>         selectionActor;
+        CommandWildcardInt             wildcardInt;
+        Json::Value                    jsonObject;
+        RelativeFloat                  rVal;
+        std::basic_string<char>        id;
         WildcardCommandSelector<Actor> wildcardSelection;
-        CommandItem item;
-        CommandBlockName block;
+        CommandItem                    item;
+        CommandBlockName               block;
     };
     cmd.overload<CmdParamC>()
         .text("c")
@@ -139,32 +161,29 @@ void regCmd(ll::Logger& logger) {
         .required("wildcardSelection")
         .required("item")
         .required("block")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamC const& param){
+        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamC const& param) {
             auto players = param.selectionPlayer.results(origin);
-            for (auto player: players) 
-                output.success("selectionPlayer = {}", player->getRealName());
+            for (auto player : players) output.success("selectionPlayer = {}", player->getRealName());
             auto actors = param.selectionActor.results(origin);
-            for (auto actor: actors)
-                output.success("selectionActor = {}", actor->getTypeName());
+            for (auto actor : actors) output.success("selectionActor = {}", actor->getTypeName());
             output.success("wildcardInt = {}", param.wildcardInt.getValue());
             // 不太会操作jsonObject，跳过
             output.success("rVal = {}", param.rVal.getValue());
             output.success("id = {}", param.id);
             auto wildcardActors = param.wildcardSelection.results(origin);
-            for (auto actor: wildcardActors)
-                output.success("wildcardSelection = {}", actor->getTypeName());
+            for (auto actor : wildcardActors) output.success("wildcardSelection = {}", actor->getTypeName());
             output.success("item = {}", param.item.getId());
             output.success("block = {}", param.block.getDescriptionId());
         }>();
-    
+
     // 设置参数
     struct CmdParamD {
-        std::string str;
-        int i;
-        float f;
-        bool b;
-        const ActorDefinitionIdentifier *adi;
-        const MobEffect *effect;
+        std::string                      str;
+        int                              i;
+        float                            f;
+        bool                             b;
+        const ActorDefinitionIdentifier* adi;
+        const MobEffect*                 effect;
     };
     cmd.overload<CmdParamD>()
         .text("d")
@@ -175,23 +194,19 @@ void regCmd(ll::Logger& logger) {
         .required("b")
         .required("adi")
         .required("effect")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamD const& param){
+        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamD const& param) {
             (void)origin;
             output.success("str={}, i={}, f={}, b={}", param.str, param.i, param.f, param.b);
             output.success("adi = {}", param.adi->getFullName());
             output.success("effect = {}", param.effect->getDescriptionId());
         }>();
-    
+
     // 设置参数
-    enum TestEnumA: int {
-        a,
-        b,
-        c
-    };
+    enum TestEnumA : int { a, b, c };
     struct CmdParamE {
         TestEnumA ea;
-        enum TestEnumB: int {d, e, f} eb;
-        ::DimensionType dim;
+        enum TestEnumB : int { d, e, f } eb;
+        ::DimensionType            dim;
         std::unique_ptr<::Command> cmd;
     };
     cmd.overload<CmdParamE>()
@@ -200,13 +215,12 @@ void regCmd(ll::Logger& logger) {
         .required("eb")
         .required("dim")
         .optional("cmd")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamE const& param){
+        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamE const& param) {
             (void)origin;
             output.success("ea = {}", param.ea);
             output.success("eb = {}", param.eb);
             output.success("dim = {}", param.dim.id);
-            if (param.cmd)
-                output.success("cmd = {}", param.cmd->getCommandName());
+            if (param.cmd) output.success("cmd = {}", param.cmd->getCommandName());
         }>();
 }
 
