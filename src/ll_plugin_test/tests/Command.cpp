@@ -52,7 +52,7 @@ void regCmd(ll::Logger& logger) {
     for (unsigned long long i = 0; i < aliasList.size(); i++)
         logger.info("Test command alias list [{}]: {}", i, aliasList[i]);
     // 无参数指令重载
-    cmd.overload().text("o").execute<[](CommandOrigin const& origin, CommandOutput& output) {
+    cmd.overload().text("o").execute([](CommandOrigin const& origin, CommandOutput& output) {
         auto* entity = origin.getEntity();
         if (entity == nullptr || !entity->isType(ActorType::Player)) {
             output.error("Only players can run this command");
@@ -60,7 +60,7 @@ void regCmd(ll::Logger& logger) {
         }
         auto* player = static_cast<Player*>(entity);
         player->sendMessage("test command");
-    }>();
+    });
 
     // 设置参数
     struct CmdParamA {
@@ -77,7 +77,7 @@ void regCmd(ll::Logger& logger) {
         .required("pathCommand")
         .required("fullIntegerRange")
         .required("messageRoot")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamA const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, CmdParamA const& param) {
             (void)origin;
             for (unsigned long long i = 0; i < param.blockStateArray.size(); i++)
                 output.success(
@@ -97,7 +97,7 @@ void regCmd(ll::Logger& logger) {
             );
             for (unsigned long long i = 0; i < param.messageRoot.components.size(); i++)
                 output.success("messageRoot[{}] = {}", i, param.messageRoot.components[i].string);
-        }>();
+        });
 
     // 设置参数
     struct CmdParamB {
@@ -112,7 +112,7 @@ void regCmd(ll::Logger& logger) {
         /* .required("position") */
         .required("positionFloat")
         .required("rawtext")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamB const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, CmdParamB const& param) {
             // output.success("operator = {}", param.commandOperator);
             // output.success("position = {}, {}, {}", param.position.getPosition(CommandVersion::CurrentVersion,
             // origin).x, param.position.getPosition(CommandVersion::CurrentVersion, origin).y,
@@ -136,7 +136,7 @@ void regCmd(ll::Logger& logger) {
                 -- OEOTYAN
             */
             output.success("rawtext = {}", param.rawtext.getText());
-        }>();
+        });
 
     // 设置参数
     struct CmdParamC {
@@ -161,7 +161,7 @@ void regCmd(ll::Logger& logger) {
         .required("wildcardSelection")
         .required("item")
         .required("block")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamC const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, CmdParamC const& param) {
             auto players = param.selectionPlayer.results(origin);
             for (auto player : players) output.success("selectionPlayer = {}", player->getRealName());
             auto actors = param.selectionActor.results(origin);
@@ -174,7 +174,7 @@ void regCmd(ll::Logger& logger) {
             for (auto actor : wildcardActors) output.success("wildcardSelection = {}", actor->getTypeName());
             output.success("item = {}", param.item.getId());
             output.success("block = {}", param.block.getDescriptionId());
-        }>();
+        });
 
     // 设置参数
     struct CmdParamD {
@@ -194,12 +194,12 @@ void regCmd(ll::Logger& logger) {
         .required("b")
         .required("adi")
         .required("effect")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamD const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, CmdParamD const& param) {
             (void)origin;
             output.success("str={}, i={}, f={}, b={}", param.str, param.i, param.f, param.b);
             output.success("adi = {}", param.adi->getFullName());
             output.success("effect = {}", param.effect->getDescriptionId());
-        }>();
+        });
 
     // 设置参数
     enum TestEnumA : int { a, b, c };
@@ -209,19 +209,15 @@ void regCmd(ll::Logger& logger) {
         ::DimensionType            dim;
         std::unique_ptr<::Command> cmd;
     };
-    cmd.overload<CmdParamE>()
-        .text("e")
-        .required("ea")
-        .required("eb")
-        .required("dim")
-        .optional("cmd")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, CmdParamE const& param) {
+    cmd.overload<CmdParamE>().text("e").required("ea").required("eb").required("dim").optional("cmd").execute(
+        [](CommandOrigin const& origin, CommandOutput& output, CmdParamE const& param) {
             (void)origin;
             output.success("ea = {}", param.ea);
             output.success("eb = {}", param.eb);
             output.success("dim = {}", param.dim.id);
             if (param.cmd) output.success("cmd = {}", param.cmd->getCommandName());
-        }>();
+        }
+    );
 }
 
 } // namespace ll_plugin_test::command
