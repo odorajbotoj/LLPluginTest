@@ -59,10 +59,10 @@ void runCmdTest() {
     cmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
         (void)origin;
         output.success("begin");
-        HashedString command1("say hello");
+        HashedString command1("say hello你好");
         RunCmdRes    res1 = RunCmd(command1);
         output.success("success: {}\noutput: {}", res1.success, res1.output);
-        HashedString command2("me 你好");
+        HashedString command2("testfor @e");
         RunCmdRes    res2 = RunCmd(command2);
         output.success("success: {}\noutput: {}", res2.success, res2.output);
         output.success("end");
