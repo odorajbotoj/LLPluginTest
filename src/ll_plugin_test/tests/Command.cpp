@@ -77,8 +77,7 @@ void regCmd(ll::Logger& logger) {
         .required("pathCommand")
         .required("fullIntegerRange")
         .required("messageRoot")
-        .execute([](CommandOrigin const& origin, CommandOutput& output, CmdParamA const& param) {
-            (void)origin;
+        .execute([](CommandOrigin const&, CommandOutput& output, CmdParamA const& param) {
             for (unsigned long long i = 0; i < param.blockStateArray.size(); i++)
                 output.success(
                     "blockStateArray[{}] = mBlockState: {}, mValue: {}, mType: {}",
@@ -194,8 +193,7 @@ void regCmd(ll::Logger& logger) {
         .required("b")
         .required("adi")
         .required("effect")
-        .execute([](CommandOrigin const& origin, CommandOutput& output, CmdParamD const& param) {
-            (void)origin;
+        .execute([](CommandOrigin const&, CommandOutput& output, CmdParamD const& param) {
             output.success("str={}, i={}, f={}, b={}", param.str, param.i, param.f, param.b);
             output.success("adi = {}", param.adi->getFullName());
             output.success("effect = {}", param.effect->getDescriptionId());
@@ -210,8 +208,7 @@ void regCmd(ll::Logger& logger) {
         std::unique_ptr<::Command> cmd;
     };
     cmd.overload<CmdParamE>().text("e").required("ea").required("eb").required("dim").optional("cmd").execute(
-        [](CommandOrigin const& origin, CommandOutput& output, CmdParamE const& param) {
-            (void)origin;
+        [](CommandOrigin const&, CommandOutput& output, CmdParamE const& param) {
             output.success("ea = {}", param.ea);
             output.success("eb = {}", param.eb);
             output.success("dim = {}", param.dim.id);
