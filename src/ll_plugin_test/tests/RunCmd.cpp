@@ -7,6 +7,7 @@
 #include "mc/server/commands/CommandOutput.h"
 #include "mc/server/commands/CommandOutputType.h"
 #include "mc/server/commands/CommandPermissionLevel.h"
+#include "mc/server/commands/CommandRawText.h"
 #include "mc/server/commands/MinecraftCommands.h"
 #include "mc/server/commands/ServerCommandOrigin.h"
 #include "mc/world/Minecraft.h"
@@ -56,8 +57,8 @@ RunCmdRes RunCmd(HashedString& cmd) {
 void runCmdTest() {
     auto& cmd = ll::command::CommandRegistrar::getInstance()
                     .getOrCreateCommand("trc", "test run command", CommandPermissionLevel::Any);
-    cmd.overload().execute([](CommandOrigin const& origin, CommandOutput& output) {
-        (void)origin;
+
+    cmd.overload().text("test").execute([](CommandOrigin const&, CommandOutput& output) {
         output.success("begin");
         HashedString command1("say hello你好");
         RunCmdRes    res1 = RunCmd(command1);
@@ -67,5 +68,18 @@ void runCmdTest() {
         output.success("success: {}\noutput: {}", res2.success, res2.output);
         output.success("end");
     });
+
+    struct Param {
+        CommandRawText cmd;
+    };
+    cmd.overload<Param>().text("exec").required("cmd").execute(
+        [](CommandOrigin const&, CommandOutput& output, Param const& param) {
+            output.success("begin");
+            HashedString command1(param.cmd.getText());
+            RunCmdRes    res1 = RunCmd(command1);
+            output.success("success: {}\noutput: {}", res1.success, res1.output);
+            output.success("end");
+        }
+    );
 }
 } // namespace ll_plugin_test::run_cmd
